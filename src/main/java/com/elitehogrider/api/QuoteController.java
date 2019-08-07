@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class QuoteController {
 
-    @RequestMapping("/")
-    public String index() {
+    @RequestMapping("/getStock")
+    public String getStock() {
         return "Greetings from Spring Boot!";
     }
 
