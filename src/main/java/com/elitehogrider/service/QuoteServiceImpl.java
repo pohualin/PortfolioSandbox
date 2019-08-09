@@ -22,14 +22,16 @@ import java.util.stream.Collectors;
 public class QuoteServiceImpl implements QuoteService {
     private final Logger log = LoggerFactory.getLogger(QuoteServiceImpl.class);
 
+    private final int TWO_HUNDRED_DAYS = 200;
+
     @Override
     public List<Indicators> getIndicators(String ticker) throws IOException {
         int daysToFetch = 365;
-        int daysToCalculate = 200;
 
+        // 200 days indicators
         Calendar today = Calendar.getInstance();
         Calendar from = (Calendar) today.clone();
-        from.add(Calendar.DATE, -daysToFetch - daysToCalculate - 1);
+        from.add(Calendar.DATE, -daysToFetch - TWO_HUNDRED_DAYS - 1);
         Calendar to = (Calendar) today.clone();
         to.add(Calendar.DATE, -1);
 
@@ -39,7 +41,7 @@ public class QuoteServiceImpl implements QuoteService {
         for (int i = 0; i < stock.getHistory().size(); i++) {
             Calendar dateTo = stock.getHistory().get(i).getDate();
             Calendar dateFrom = (Calendar) dateTo.clone();
-            dateFrom.add(Calendar.DATE, -daysToCalculate);
+            dateFrom.add(Calendar.DATE, -TWO_HUNDRED_DAYS);
 
             List<HistoricalQuote> quotes =
                     stock.getHistory().stream()
