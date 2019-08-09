@@ -1,8 +1,10 @@
 package com.elitehogrider.service;
 
-import yahoofinance.Stock;
+import com.elitehogrider.model.Indicators;
+
+import java.io.IOException;
+import java.util.List;
 
 public interface QuoteService {
-
-    Stock getStock(String ticker);
+    List<Indicators> getIndicators(String ticker) throws IOException;
 }

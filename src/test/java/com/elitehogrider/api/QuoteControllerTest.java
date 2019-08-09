@@ -13,6 +13,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import yahoofinance.Stock;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,11 +33,12 @@ public class QuoteControllerTest {
 
     @Test
     public void getStock() throws Exception {
-        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/quote/getStock").accept(MediaType.APPLICATION_JSON).content("T"))
+        mvc.perform(MockMvcRequestBuilders.get("/quote/getStock/T").accept(MediaType.APPLICATION_JSON).content("T"))
                 .andExpect(status().isOk())
                 .andReturn();
 
         Stock stock = quoteContoller.getStock("T");
         Assert.assertTrue(stock.getSymbol().equalsIgnoreCase("T"));
     }
+
 }
