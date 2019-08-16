@@ -3,11 +3,9 @@ package com.elitehogrider.service;
 import com.elitehogrider.model.Holding;
 import com.elitehogrider.model.Order;
 import com.elitehogrider.model.Portfolio;
-import com.elitehogrider.model.Ticker;
 import com.elitehogrider.model.TradeType;
 import com.elitehogrider.model.Trader;
 import com.elitehogrider.validator.OrderValidator;
-import com.github.benmanes.caffeine.cache.Cache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +17,8 @@ import yahoofinance.YahooFinance;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class TradeServiceImpl implements TradeService {
@@ -37,32 +35,40 @@ public class TradeServiceImpl implements TradeService {
         Trader trader = traderService.getTrader(traderId);
         Portfolio portfolio = trader.getPortfolio();
 
-        OrderValidator.isValid(portfolio, order);
+        if (!OrderValidator.isValid(portfolio, order)) {
+            throw new RuntimeException("Not enough cash to buy");
+        }
 
         BigDecimal cash = trader.getPortfolio().getCash();
         BigDecimal amount = order.getPrice().multiply(order.getShares());
         portfolio.setCash(cash.subtract(amount));
 
-        Holding holding = new Holding(order.getTicker(), order.getPrice(), order.getShares());
         if (portfolio.getHoldings().containsKey(order.getTicker())) {
-            portfolio.getHoldings().get(order.getTicker()).add(holding);
+            Holding holding = portfolio.getHoldings().get(order.getTicker()).get(0);
+            holding.setShares(holding.getShares().add(order.getShares()));
         } else {
+            Holding holding = new Holding(order.getTicker(), order.getPrice(), order.getShares());
             List<Holding> holdings = new ArrayList<>();
             holdings.add(holding);
             portfolio.getHoldings().put(order.getTicker(), holdings);
         }
+
+        log.debug("Bought {} shares of {} at {} on {}",
+                order.getShares(), order.getTicker().name(), order.getPrice(), order.getDate().getTime());
 
         updatePortfolioValue(portfolio);
     }
 
     @Override
     public void sell(Long traderId, Order order) {
-        Assert.isTrue(order.getType().equals(TradeType.SELL), "Buy order should have TradeType.SELL");
+        Assert.isTrue(order.getType().equals(TradeType.SELL), "Sell order should have TradeType.SELL");
 
         Trader trader = traderService.getTrader(traderId);
         Portfolio portfolio = trader.getPortfolio();
 
-        OrderValidator.isValid(portfolio, order);
+        if (!OrderValidator.isValid(portfolio, order)) {
+            throw new RuntimeException("Not enough shares to sell");
+        }
 
         BigDecimal cash = trader.getPortfolio().getCash();
         BigDecimal amount = order.getPrice().multiply(order.getShares());
@@ -71,22 +77,25 @@ public class TradeServiceImpl implements TradeService {
         List<Holding> holdings = trader.getPortfolio().getHoldings().get(order.getTicker());
         holdings.get(0).setShares(holdings.get(0).getShares().subtract(order.getShares()));
 
+        log.debug("Sold {} shares of {} at {} on {}",
+                order.getShares(), order.getTicker().name(), order.getPrice(), order.getDate().getTime());
         updatePortfolioValue(portfolio);
     }
 
     private void updatePortfolioValue(Portfolio portfolio) {
-        BigDecimal stockValue = new BigDecimal(0);
+        AtomicReference<BigDecimal> reference = new AtomicReference<>();
+        reference.set(new BigDecimal(0));
         portfolio.getHoldings().forEach((ticker, holdings) -> {
             try {
                 Stock stock = YahooFinance.get(ticker.name());
                 BigDecimal shares = holdings.get(0).getShares();
-                stockValue.add(stock.getQuote().getPrice().multiply(shares));
+                reference.set(reference.get().add(stock.getQuote().getPrice().multiply(shares)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
 
-        portfolio.setValue(stockValue.add(portfolio.getCash()));
+        portfolio.setValue(reference.get().add(portfolio.getCash()));
         log.debug("Updated portfolio value: {}", portfolio.getValue());
     }
 }
