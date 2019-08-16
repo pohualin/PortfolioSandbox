@@ -26,18 +26,18 @@ public class TradeServiceTest {
     private final Logger log = LoggerFactory.getLogger(TradeServiceTest.class);
 
     @Autowired
+    TraderService traderService;
+
+    @Autowired
     TradeService tradeService;
 
     @Test
-    public void createAccount() {
-        Trader.newTrader("George", new BigDecimal(10000));
-    }
-
-    @Test
     public void buy() throws IOException {
-        Trader george = Trader.newTrader("George", new BigDecimal(10000));
+        Trader george = traderService.newTrader("George", new BigDecimal(10000));
         Order buy = new Order(Calendar.getInstance(), Ticker.T, TradeType.BUY, new BigDecimal(30), new BigDecimal(100));
-        george = tradeService.buy(george, buy);
+        tradeService.buy(george.getId(), buy);
+
+        george = traderService.getTrader(george.getId());
 
         Assert.assertTrue(george.getPortfolio().getCash().equals(new BigDecimal(7000)));
         Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getPrice().equals(new BigDecimal(30)));
@@ -47,16 +47,18 @@ public class TradeServiceTest {
 
     @Test
     public void sell() throws IOException {
-        Trader george = Trader.newTrader("George", new BigDecimal(10000));
+        Trader george = traderService.newTrader("George", new BigDecimal(10000));
         Order buy = new Order(Calendar.getInstance(), Ticker.T, TradeType.BUY, new BigDecimal(30), new BigDecimal(100));
-        george = tradeService.buy(george, buy);
+        tradeService.buy(george.getId(), buy);
 
         log.debug("{} shares", george.getPortfolio().getHoldings().get(Ticker.T).get(0).getShares());
 
         Order sell = new Order(Calendar.getInstance(), Ticker.T, TradeType.SELL, new BigDecimal(30), new BigDecimal(50));
-        george = tradeService.sell(george, sell);
+        tradeService.sell(george.getId(), sell);
 
         log.debug("{} shares", george.getPortfolio().getHoldings().get(Ticker.T).get(0).getShares());
+
+        george = traderService.getTrader(george.getId());
 
         Assert.assertTrue(george.getPortfolio().getCash().equals(new BigDecimal(8500)));
         Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getShares().equals(new BigDecimal(50)));

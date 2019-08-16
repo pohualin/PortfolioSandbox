@@ -3,9 +3,12 @@ package com.elitehogrider.service;
 import com.elitehogrider.model.Order;
 import com.elitehogrider.model.Trader;
 
+import java.util.List;
+
 public interface TradeService {
 
-    Trader buy(Trader trader, Order order);
+    void buy(Long traderId, Order order);
 
-    Trader sell(Trader trader, Order order);
+    void sell(Long traderId, Order order);
+
 }

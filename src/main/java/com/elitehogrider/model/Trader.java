@@ -1,22 +1,26 @@
 package com.elitehogrider.model;
 
-
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public class Trader {
+
+    Long id;
+    String name;
+    Portfolio portfolio;
 
     private Trader() {
     }
 
-    public static Trader newTrader(String name, BigDecimal amount) {
-        Trader trader = new Trader();
-        trader.name = name;
-        trader.portfolio = Portfolio.newPortfolio(amount);
-        return trader;
+    public Trader(String name, BigDecimal amount) {
+        this.id = UUID.randomUUID().getMostSignificantBits();
+        this.name = name;
+        this.portfolio = Portfolio.newPortfolio(amount);
     }
 
-    String name;
-    Portfolio portfolio;
+    public Long getId() {
+        return id;
+    }
 
     public String getName() {
         return name;
