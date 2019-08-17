@@ -44,7 +44,7 @@ public class TradeServiceTest {
 
         george = traderService.getTrader(george.getId());
 
-        Assert.assertTrue(george.getPortfolio().getCash().equals(new BigDecimal(7000)));
+        Assert.assertTrue(george.getPortfolio().getCash().equals(new BigDecimal(7000).setScale(5)));
         Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getPrice().equals(new BigDecimal(30)));
         Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getShares().equals(new BigDecimal(100)));
         Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getTicker().equals(Ticker.T));
@@ -72,7 +72,7 @@ public class TradeServiceTest {
 
         george = traderService.getTrader(george.getId());
 
-        Assert.assertTrue(george.getPortfolio().getCash().equals(new BigDecimal(8500)));
+        Assert.assertTrue(george.getPortfolio().getCash().equals(new BigDecimal(8500).setScale(5)));
         Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getShares().equals(new BigDecimal(50)));
         Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getTicker().equals(Ticker.T));
     }
