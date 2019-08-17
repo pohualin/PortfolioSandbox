@@ -38,4 +38,11 @@ public class TraderServiceTest {
         Trader created = traderService.getTrader(trader.getId());
         Assert.assertTrue(trader.getId().equals(created.getId()));
     }
+
+    @Test
+    public void getUnknownTrader() {
+        Trader created = traderService.getTrader(1l);
+        Assert.assertTrue(created == null);
+    }
+
 }

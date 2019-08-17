@@ -13,10 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
+import yahoofinance.histquotes.HistoricalQuote;
+import yahoofinance.histquotes.Interval;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,7 +44,7 @@ public class TradeServiceImpl implements TradeService {
 
         BigDecimal cash = trader.getPortfolio().getCash();
         BigDecimal amount = order.getPrice().multiply(order.getShares());
-        portfolio.setCash(cash.subtract(amount));
+        portfolio.setCash(cash.subtract(amount).setScale(5, BigDecimal.ROUND_HALF_UP));
 
         if (portfolio.getHoldings().containsKey(order.getTicker())) {
             Holding holding = portfolio.getHoldings().get(order.getTicker()).get(0);
@@ -56,7 +59,7 @@ public class TradeServiceImpl implements TradeService {
         log.debug("Bought {} shares of {} at {} on {}",
                 order.getShares(), order.getTicker().name(), order.getPrice(), order.getDate().getTime());
 
-        updatePortfolioValue(portfolio);
+        updatePortfolioValue(portfolio, order.getDate());
     }
 
     @Override
@@ -73,29 +76,35 @@ public class TradeServiceImpl implements TradeService {
         BigDecimal cash = trader.getPortfolio().getCash();
         BigDecimal amount = order.getPrice().multiply(order.getShares());
 
-        portfolio.setCash(cash.add(amount));
+        portfolio.setCash(cash.add(amount).setScale(5, BigDecimal.ROUND_HALF_UP));
         List<Holding> holdings = trader.getPortfolio().getHoldings().get(order.getTicker());
         holdings.get(0).setShares(holdings.get(0).getShares().subtract(order.getShares()));
 
         log.debug("Sold {} shares of {} at {} on {}",
                 order.getShares(), order.getTicker().name(), order.getPrice(), order.getDate().getTime());
-        updatePortfolioValue(portfolio);
+        updatePortfolioValue(portfolio, order.getDate());
     }
 
-    private void updatePortfolioValue(Portfolio portfolio) {
+    @Override
+    public void updatePortfolioValue(Portfolio portfolio, Calendar updatedOn) {
         AtomicReference<BigDecimal> reference = new AtomicReference<>();
         reference.set(new BigDecimal(0));
         portfolio.getHoldings().forEach((ticker, holdings) -> {
             try {
                 Stock stock = YahooFinance.get(ticker.name());
+                List<HistoricalQuote> quotes = stock.getHistory(updatedOn, updatedOn, Interval.DAILY);
                 BigDecimal shares = holdings.get(0).getShares();
-                reference.set(reference.get().add(stock.getQuote().getPrice().multiply(shares)));
+                reference.set(reference.get().add(quotes.get(0).getClose().multiply(shares)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         });
 
-        portfolio.setValue(reference.get().add(portfolio.getCash()));
+        log.debug("Cash: {}", portfolio.getCash());
+        portfolio.getHoldings().forEach((ticker, holdings) -> {
+            log.debug("{} shares of {}", holdings.get(0).getShares(), ticker.name());
+        });
+        portfolio.setValue(reference.get().add(portfolio.getCash()).setScale(5, BigDecimal.ROUND_HALF_UP));
         log.debug("Updated portfolio value: {}", portfolio.getValue());
     }
 }

@@ -26,8 +26,7 @@ public final class Calculator {
         return stdev;
     }
 
-    public static BigDecimal getShares(BigDecimal price) {
-        BigDecimal amount = new BigDecimal(500);
+    public static BigDecimal getShares(BigDecimal amount, BigDecimal price) {
         return amount.divide(price, 5, BigDecimal.ROUND_HALF_UP);
     }
 

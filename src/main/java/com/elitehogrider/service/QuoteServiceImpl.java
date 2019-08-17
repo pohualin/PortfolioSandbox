@@ -25,7 +25,7 @@ public class QuoteServiceImpl implements QuoteService {
     private final int TWO_HUNDRED_DAYS = 200;
 
     @Override
-    public List<Indicators> getIndicators(String ticker) throws IOException {
+    public List<Indicators> getIndicators(String ticker) {
         int daysToFetch = 365;
 
         // 200 days indicators
@@ -35,27 +35,33 @@ public class QuoteServiceImpl implements QuoteService {
         Calendar to = (Calendar) today.clone();
         to.add(Calendar.DATE, -1);
 
-        Stock stock = YahooFinance.get(ticker, from, to, Interval.DAILY);
-
+        Stock stock;
         List<Indicators> items = new ArrayList<>();
-        for (int i = 0; i < stock.getHistory().size(); i++) {
-            Calendar dateTo = stock.getHistory().get(i).getDate();
-            Calendar dateFrom = (Calendar) dateTo.clone();
-            dateFrom.add(Calendar.DATE, -TWO_HUNDRED_DAYS);
+        try {
+            stock = YahooFinance.get(ticker, from, to, Interval.DAILY);
+            for (int i = 0; i < stock.getHistory().size(); i++) {
+                HistoricalQuote historicalQuote = stock.getHistory().get(i);
+                Calendar dateTo = historicalQuote.getDate();
+                Calendar dateFrom = (Calendar) dateTo.clone();
+                dateFrom.add(Calendar.DATE, -TWO_HUNDRED_DAYS);
 
-            List<HistoricalQuote> quotes =
-                    stock.getHistory().stream()
-                            .filter(historicalQuote -> !historicalQuote.getDate().before(dateFrom) && !historicalQuote.getDate().after(dateTo))
-                            .collect(Collectors.toList());
-            log.debug("Dates: {} ~ {}", dateFrom.getTime(), dateTo.getTime());
-            log.debug("History: {}", QuoteUtil.getHistoryCloses(quotes));
+                List<HistoricalQuote> quotes =
+                        stock.getHistory().stream()
+                                .filter(hq -> !hq.getDate().before(dateFrom) && !hq.getDate().after(dateTo))
+                                .collect(Collectors.toList());
 
-            if (quotes.size() > 1)
-                items.add(new Indicators(dateTo,
-                        Calculator.average(QuoteUtil.getHistoryCloses(quotes)),
-                        Calculator.stdev(QuoteUtil.getHistoryCloses(quotes))));
+                log.debug("Dates: {} ~ {}", dateFrom.getTime(), dateTo.getTime());
+                log.debug("History: {}", QuoteUtil.getHistoryCloses(quotes));
+
+                if (quotes.size() > 1)
+                    items.add(new Indicators(historicalQuote,
+                            Calculator.average(QuoteUtil.getHistoryCloses(quotes)),
+                            Calculator.stdev(QuoteUtil.getHistoryCloses(quotes))));
+            }
+            Collections.sort(items);
+        } catch (IOException e) {
+            throw new RuntimeException();
         }
-        Collections.sort(items);
 
         return items;
     }
