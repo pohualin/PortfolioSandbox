@@ -1,9 +1,9 @@
 package com.elitehogrider.service;
 
-import com.elitehogrider.model.Indicators;
+import com.elitehogrider.model.TwoHundredDaysIndicators;
 
 import java.util.List;
 
 public interface QuoteService {
-    List<Indicators> getIndicators(String ticker);
+    List<TwoHundredDaysIndicators> getTwoHundredDaysIndicators(String ticker);
 }

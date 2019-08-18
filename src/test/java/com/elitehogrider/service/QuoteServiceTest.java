@@ -23,7 +23,7 @@ public class QuoteServiceTest {
 
     @Test
     public void quoteMatrix() throws IOException {
-        log.debug("T Indicators: {}", quoteService.getIndicators("T").toString());
+        log.debug("T TwoHundredDaysIndicators: {}", quoteService.getTwoHundredDaysIndicators("T").toString());
     }
 
 }

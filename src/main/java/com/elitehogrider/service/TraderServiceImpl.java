@@ -28,4 +28,5 @@ public class TraderServiceImpl implements TraderService {
     public Trader getTrader(Long id) {
         return traderCache.getIfPresent(id);
     }
+
 }

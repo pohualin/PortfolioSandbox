@@ -27,7 +27,7 @@ public class AbstractStrategy implements Strategy {
     TraderService traderService;
 
     @Override
-    public List<Signal> identifySignal() {
+    public List<Signal> identifySignal(Portfolio portfolio) {
         return Collections.EMPTY_LIST;
     }
 
@@ -45,14 +45,13 @@ public class AbstractStrategy implements Strategy {
 
     @Override
     public void execute(Long traderId) {
-        List<Signal> signals = identifySignal();
-
         Trader trader = traderService.getTrader(traderId);
         if (trader == null) {
             throw new RuntimeException("Not an existing trader. Please create a trader.");
         }
         Portfolio portfolio = trader.getPortfolio();
 
+        List<Signal> signals = identifySignal(portfolio);
         int[] counts = {0, 0, 0};
         signals.stream().forEach((signal) -> {
             Order orderToProcess = processSignal(portfolio, signal);
