@@ -11,6 +11,4 @@ public interface TradeService {
 
     void sell(Long traderId, Order order);
 
-    void updatePortfolioValue(Portfolio portfolio, Calendar updatedOn);
-
 }

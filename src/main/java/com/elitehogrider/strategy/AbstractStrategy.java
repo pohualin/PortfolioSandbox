@@ -4,6 +4,7 @@ import com.elitehogrider.model.Order;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
 import com.elitehogrider.model.Trader;
+import com.elitehogrider.service.PortfolioService;
 import com.elitehogrider.service.TradeService;
 import com.elitehogrider.service.TraderService;
 import com.elitehogrider.util.Calculator;
@@ -25,6 +26,9 @@ public class AbstractStrategy implements Strategy {
 
     @Autowired
     TraderService traderService;
+
+    @Autowired
+    PortfolioService portfolioService;
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio) {
@@ -68,7 +72,7 @@ public class AbstractStrategy implements Strategy {
                 }
             } else {
                 counts[2]++;
-                tradeService.updatePortfolioValue(portfolio, signal.getDate());
+                portfolioService.updateValue(portfolio, signal.getDate());
             }
         });
 

@@ -1,9 +1,7 @@
 package com.elitehogrider.strategy;
 
-import com.elitehogrider.model.Indicators;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
-import com.elitehogrider.model.Ticker;
 import com.elitehogrider.model.TradeType;
 import com.elitehogrider.model.TwoHundredDaysIndicators;
 import com.elitehogrider.service.QuoteService;
@@ -23,22 +21,29 @@ public class TraderAStrategy extends AbstractStrategy implements Strategy {
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio) {
-        List<TwoHundredDaysIndicators> indicatorsList = quoteService.getTwoHundredDaysIndicators(Ticker.T.name());
+        if (portfolio.getHoldings().isEmpty()) {
+            throw new RuntimeException("Portfolio contains no Tickers");
+        }
 
         List<Signal> signals = new ArrayList<>();
-        indicatorsList.forEach((indicators -> {
-            BigDecimal close = indicators.getHistoricalQuote().getClose();
-            HistoricalQuote hq = indicators.getHistoricalQuote();
 
-            if (close.compareTo(indicators.getMeanMinusTwoStdev()) == -1) {
-                signals.add(new Signal(hq.getDate(), Ticker.T, TradeType.BUY, indicators));
-            }
+        portfolio.getHoldings().keySet().forEach((ticker) -> {
+            List<TwoHundredDaysIndicators> indicatorsList = quoteService.getTwoHundredDaysIndicators(ticker.name());
 
-            if (close.compareTo(indicators.getMeanAddTwoStdev()) == 1) {
-                signals.add(new Signal(hq.getDate(), Ticker.T, TradeType.SELL, indicators));
-            }
+            indicatorsList.forEach((indicators -> {
+                BigDecimal close = indicators.getHistoricalQuote().getClose();
+                HistoricalQuote hq = indicators.getHistoricalQuote();
 
-        }));
+                if (close.compareTo(indicators.getMeanMinusTwoStdev()) == -1) {
+                    signals.add(new Signal(hq.getDate(), ticker, TradeType.BUY, indicators));
+                }
+
+                if (close.compareTo(indicators.getMeanAddTwoStdev()) == 1) {
+                    signals.add(new Signal(hq.getDate(), ticker, TradeType.SELL, indicators));
+                }
+
+            }));
+        });
 
         return signals;
     }
