@@ -3,6 +3,7 @@ package com.elitehogrider.strategy;
 import com.elitehogrider.model.Order;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
+import com.elitehogrider.model.TradeResult;
 import com.elitehogrider.model.Trader;
 import com.elitehogrider.service.PortfolioService;
 import com.elitehogrider.service.TradeService;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,7 +50,7 @@ public class AbstractStrategy implements Strategy {
     }
 
     @Override
-    public void execute(Long traderId) {
+    public List<Signal> execute(Long traderId) {
         Trader trader = traderService.getTrader(traderId);
         if (trader == null) {
             throw new RuntimeException("Not an existing trader. Please create a trader.");
@@ -56,6 +58,7 @@ public class AbstractStrategy implements Strategy {
         Portfolio portfolio = trader.getPortfolio();
 
         List<Signal> signals = identifySignal(portfolio);
+        List<Order> orders = new ArrayList<>();
         int[] counts = {0, 0, 0};
         signals.stream().forEach((signal) -> {
             Order orderToProcess = processSignal(portfolio, signal);
@@ -71,12 +74,14 @@ public class AbstractStrategy implements Strategy {
                         break;
                 }
             } else {
-                counts[2]++;
                 portfolioService.updateValue(portfolio, signal.getDate());
+                counts[2]++;
             }
+            orders.add(orderToProcess);
         });
 
         log.debug("Identified {} trading signal", signals.size());
         log.debug("{} bought {} sold and {} discarded", counts[0], counts[1], counts[2]);
+        return signals;
     }
 }

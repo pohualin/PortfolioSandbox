@@ -37,4 +37,5 @@ public class Order {
     public BigDecimal getShares() {
         return shares;
     }
+
 }

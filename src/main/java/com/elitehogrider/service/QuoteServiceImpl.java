@@ -12,9 +12,15 @@ import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,27 +30,54 @@ public class QuoteServiceImpl implements QuoteService {
 
     private final int TWO_HUNDRED_DAYS = 200;
 
+    /**
+     * Two hundred days indicators are calculated from today -200 to today.
+     * With real time data, we only get today -200 to today -1
+     * With historical data, we should calculate from dateTo -200 to dateTo -1
+     *
+     * @param ticker
+     * @return
+     */
     @Override
     public List<TwoHundredDaysIndicators> getTwoHundredDaysIndicators(String ticker) {
         int daysToFetch = 365;
 
         // 200 days indicators
         Calendar today = Calendar.getInstance();
+
         Calendar from = (Calendar) today.clone();
-        from.add(Calendar.DATE, -daysToFetch - 1);
+        from.add(Calendar.DATE, -daysToFetch);
         Calendar fetchFrom = (Calendar) today.clone();
-        fetchFrom.add(Calendar.DATE, -daysToFetch - TWO_HUNDRED_DAYS - 1);
+        fetchFrom.add(Calendar.DATE, -daysToFetch - TWO_HUNDRED_DAYS);
         Calendar to = (Calendar) today.clone();
-        to.add(Calendar.DATE, -1);
 
         Stock stock;
         List<TwoHundredDaysIndicators> items = new ArrayList<>();
         try {
             stock = YahooFinance.get(ticker, fetchFrom, to, Interval.DAILY);
+
+            // Adding today when there is no HistoricalQuote for today (at trading hours)
+            LocalDateTime now = LocalDateTime.now();
+            Instant startOfDay = now.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
+            Calendar midnight = Calendar.getInstance();
+            midnight.setTime(Date.from(startOfDay));
+
+            List<HistoricalQuote> filtered = stock.getHistory().stream()
+                    .filter(historicalQuote -> historicalQuote.getDate().equals(midnight))
+                    .collect(Collectors.toList());
+
+            if (filtered.isEmpty()) {
+                HistoricalQuote present = new HistoricalQuote();
+                present.setDate(midnight);
+                stock.getHistory().add(present);
+            }
+
             for (int i = 0; i < stock.getHistory().size(); i++) {
                 HistoricalQuote historicalQuote = stock.getHistory().get(i);
-                Calendar dateTo = historicalQuote.getDate();
-                Calendar dateFrom = (Calendar) dateTo.clone();
+                Calendar hqDate = historicalQuote.getDate();
+                Calendar dateTo = (Calendar) hqDate.clone();
+                dateTo.add(Calendar.DATE, -1);
+                Calendar dateFrom = (Calendar) hqDate.clone();
                 dateFrom.add(Calendar.DATE, -TWO_HUNDRED_DAYS);
 
                 if (!dateTo.before(from)) {

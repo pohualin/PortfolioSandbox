@@ -1,9 +1,12 @@
 package com.elitehogrider.api;
 
 import com.elitehogrider.model.Ticker;
+import com.elitehogrider.model.TwoHundredDaysIndicators;
+import com.elitehogrider.service.QuoteService;
 import com.elitehogrider.util.QuoteUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +26,9 @@ import java.util.Map;
 public class QuoteController {
 
     private static Logger log = LoggerFactory.getLogger(QuoteController.class);
+
+    @Autowired
+    QuoteService quoteService;
 
     @RequestMapping("getStock/{ticker}")
     public Stock getStock(@PathVariable String ticker) throws IOException {
@@ -47,6 +53,11 @@ public class QuoteController {
         Calendar ago = Calendar.getInstance();
         ago.add(Calendar.YEAR, -1);
         return QuoteUtil.getHistoryCloses(YahooFinance.get(ticker, ago, Interval.DAILY).getHistory());
+    }
+
+    @RequestMapping("getTwoHundredDaysIndicators/{ticker}")
+    public List<TwoHundredDaysIndicators> getTwoHundredDaysIndicators(@PathVariable String ticker) {
+        return quoteService.getTwoHundredDaysIndicators(ticker);
     }
 
 }

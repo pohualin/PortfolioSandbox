@@ -12,6 +12,6 @@ public interface Strategy {
 
     Order processSignal(Portfolio portfolio, Signal signal);
 
-    void execute(Long traderId);
+    List<Signal> execute(Long traderId);
 
 }

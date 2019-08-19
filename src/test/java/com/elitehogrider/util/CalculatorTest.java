@@ -32,8 +32,8 @@ public class CalculatorTest {
 
         Calendar from = (Calendar) today.clone();
         Calendar to = (Calendar) today.clone();
-        from.add(Calendar.DATE, -201);
-        to.add(Calendar.DATE, -1);
+        from.add(Calendar.DATE, -200);
+        to.add(Calendar.DATE, 0);
 
         Stock stock = YahooFinance.get("T", from, to, Interval.DAILY);
 
