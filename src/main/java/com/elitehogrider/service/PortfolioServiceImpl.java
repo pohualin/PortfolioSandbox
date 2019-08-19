@@ -1,6 +1,5 @@
 package com.elitehogrider.service;
 
-import com.elitehogrider.model.Holding;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Ticker;
 import org.slf4j.Logger;
@@ -13,14 +12,14 @@ import yahoofinance.histquotes.Interval;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Service
 public class PortfolioServiceImpl implements PortfolioService {
@@ -34,9 +33,19 @@ public class PortfolioServiceImpl implements PortfolioService {
         portfolio.getHoldings().forEach((ticker, holdings) -> {
             try {
                 Stock stock = YahooFinance.get(ticker.name());
-                List<HistoricalQuote> quotes = stock.getHistory(updatedOn, updatedOn, Interval.DAILY);
                 BigDecimal shares = holdings.get(0).getShares();
-                reference.set(reference.get().add(quotes.get(0).getClose().multiply(shares)));
+
+                LocalDateTime now = LocalDateTime.now();
+                Instant startOfDay = now.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
+                Calendar midnight = Calendar.getInstance();
+                midnight.setTime(Date.from(startOfDay));
+
+                if (updatedOn.before(midnight)) {
+                    List<HistoricalQuote> quotes = stock.getHistory(updatedOn, updatedOn, Interval.DAILY);
+                    reference.set(reference.get().add(quotes.get(0).getClose().multiply(shares)));
+                } else {
+                    reference.set(reference.get().add(stock.getQuote().getPrice().multiply(shares)));
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

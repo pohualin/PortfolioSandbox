@@ -13,10 +13,8 @@ import yahoofinance.histquotes.Interval;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -69,6 +67,7 @@ public class QuoteServiceImpl implements QuoteService {
             if (filtered.isEmpty()) {
                 HistoricalQuote present = new HistoricalQuote();
                 present.setDate(midnight);
+                present.setClose(stock.getQuote().getPrice());
                 stock.getHistory().add(present);
             }
 

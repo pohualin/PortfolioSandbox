@@ -22,7 +22,7 @@ public class TraderAStrategy extends AbstractStrategy implements Strategy {
     @Override
     public List<Signal> identifySignal(Portfolio portfolio) {
         if (portfolio.getHoldings().isEmpty()) {
-            throw new RuntimeException("Portfolio contains no Tickers");
+            throw new RuntimeException("Portfolio contains no stocks");
         }
 
         List<Signal> signals = new ArrayList<>();
