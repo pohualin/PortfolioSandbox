@@ -30,6 +30,10 @@ public class TwoHundredDaysIndicators extends Indicators {
         return meanMinusTwoStdev;
     }
 
+    public BigDecimal getMeanAddOneStdev() {
+        return meanAddOneStdev;
+    }
+
     public BigDecimal getMeanAddTwoStdev() {
         return meanAddTwoStdev;
     }

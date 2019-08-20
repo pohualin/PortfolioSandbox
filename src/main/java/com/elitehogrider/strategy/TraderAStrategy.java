@@ -2,6 +2,7 @@ package com.elitehogrider.strategy;
 
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
+import com.elitehogrider.model.SignalStatus;
 import com.elitehogrider.model.TradeType;
 import com.elitehogrider.model.TwoHundredDaysIndicators;
 import com.elitehogrider.service.QuoteService;
@@ -45,11 +46,11 @@ public class TraderAStrategy extends AbstractStrategy implements Strategy {
                 HistoricalQuote hq = indicators.getHistoricalQuote();
 
                 if (close.compareTo(indicators.getMeanMinusTwoStdev()) == -1) {
-                    signals.add(new Signal(hq.getDate(), ticker, TradeType.BUY, indicators));
+                    signals.add(new Signal(hq.getDate(), ticker, TradeType.BUY, indicators, SignalStatus.IDENTIFIED));
                 }
 
                 if (close.compareTo(indicators.getMeanAddTwoStdev()) == 1) {
-                    signals.add(new Signal(hq.getDate(), ticker, TradeType.SELL, indicators));
+                    signals.add(new Signal(hq.getDate(), ticker, TradeType.SELL, indicators, SignalStatus.IDENTIFIED));
                 }
 
             }));

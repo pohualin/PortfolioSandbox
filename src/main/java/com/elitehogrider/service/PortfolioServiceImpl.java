@@ -32,26 +32,30 @@ public class PortfolioServiceImpl implements PortfolioService {
         AtomicReference<BigDecimal> reference = new AtomicReference<>();
         reference.set(new BigDecimal(0));
         portfolio.getHoldings().forEach((ticker, holdings) -> {
-            try {
-                Stock stock = YahooFinance.get(ticker.name());
-                BigDecimal shares = holdings.get(0).getShares();
+            if (!holdings.isEmpty()) {
+                try {
+                    Stock stock = YahooFinance.get(ticker.name());
+                    BigDecimal shares = holdings.get(0).getShares();
 
-                Calendar midnight = DateUtil.midnight();
+                    Calendar midnight = DateUtil.midnight();
 
-                if (updatedOn.before(midnight)) {
-                    List<HistoricalQuote> quotes = stock.getHistory(updatedOn, updatedOn, Interval.DAILY);
-                    reference.set(reference.get().add(quotes.get(0).getClose().multiply(shares)));
-                } else {
-                    reference.set(reference.get().add(stock.getQuote().getPrice().multiply(shares)));
+                    if (updatedOn.before(midnight)) {
+                        List<HistoricalQuote> quotes = stock.getHistory(updatedOn, updatedOn, Interval.DAILY);
+                        reference.set(reference.get().add(quotes.get(0).getClose().multiply(shares)));
+                    } else {
+                        reference.set(reference.get().add(stock.getQuote().getPrice().multiply(shares)));
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         });
 
         log.debug("Cash: {}", portfolio.getCash());
         portfolio.getHoldings().forEach((ticker, holdings) -> {
-            log.debug("{} shares of {}", holdings.get(0).getShares(), ticker.name());
+            if (!holdings.isEmpty()) {
+                log.debug("{} shares of {}", holdings.get(0).getShares(), ticker.name());
+            }
         });
         portfolio.setValue(reference.get().add(portfolio.getCash()).setScale(5, BigDecimal.ROUND_HALF_UP));
         log.debug("Updated portfolio value: {}", portfolio.getValue());
