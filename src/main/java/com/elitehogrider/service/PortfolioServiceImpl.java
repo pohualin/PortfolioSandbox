@@ -2,6 +2,7 @@ package com.elitehogrider.service;
 
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Ticker;
+import com.elitehogrider.util.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -35,10 +36,7 @@ public class PortfolioServiceImpl implements PortfolioService {
                 Stock stock = YahooFinance.get(ticker.name());
                 BigDecimal shares = holdings.get(0).getShares();
 
-                LocalDateTime now = LocalDateTime.now();
-                Instant startOfDay = now.toLocalDate().atStartOfDay(ZoneId.systemDefault()).toInstant();
-                Calendar midnight = Calendar.getInstance();
-                midnight.setTime(Date.from(startOfDay));
+                Calendar midnight = DateUtil.midnight();
 
                 if (updatedOn.before(midnight)) {
                     List<HistoricalQuote> quotes = stock.getHistory(updatedOn, updatedOn, Interval.DAILY);

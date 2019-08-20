@@ -4,6 +4,7 @@ import com.elitehogrider.model.Ticker;
 import com.elitehogrider.model.Trader;
 import com.elitehogrider.service.PortfolioService;
 import com.elitehogrider.service.TraderService;
+import com.elitehogrider.util.DateUtil;
 import net.bytebuddy.asm.Advice;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +18,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Calendar;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest()
@@ -43,8 +45,20 @@ public class TraderATest {
     }
 
     @Test
-    public void execute() {
-        traderAStrategy.execute(traderA.getId());
+    public void identifySignal() {
+        log.debug("Midnight {}", DateUtil.midnight());
+        traderAStrategy.identifySignal(traderA.getPortfolio());
+        log.debug("Midnight {}", DateUtil.midnight());
+    }
+
+    @Test
+    public void simulate() {
+        Calendar today = Calendar.getInstance();
+        Calendar from = (Calendar) today.clone();
+        from.add(Calendar.YEAR, -1);
+        Calendar to = (Calendar) today.clone();
+        to.add(Calendar.MONTH, -1);
+        traderAStrategy.simulate(traderA.getId(), from, to);
     }
 
 }

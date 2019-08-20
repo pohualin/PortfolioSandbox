@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
+import java.util.Calendar;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest()
@@ -22,8 +23,23 @@ public class QuoteServiceTest {
     QuoteService quoteService;
 
     @Test
-    public void quoteMatrix() throws IOException {
-        log.debug("T TwoHundredDaysIndicators: {}", quoteService.getTwoHundredDaysIndicators("T").toString());
+    public void twoHundredDaysIndicators() throws IOException {
+        Calendar today = Calendar.getInstance();
+        Calendar from = (Calendar) today.clone();
+        from.add(Calendar.YEAR, -1);
+        Calendar to = (Calendar) today.clone();
+        to.add(Calendar.MONTH, -1);
+        quoteService.getTwoHundredDaysIndicators("T", from, to);
+    }
+
+    @Test
+    public void twoHundredDaysIndicatorsBadDates() throws IOException {
+        Calendar today = Calendar.getInstance();
+        Calendar from = (Calendar) today.clone();
+        from.add(Calendar.YEAR, -1);
+        Calendar to = (Calendar) today.clone();
+        to.add(Calendar.YEAR, -2);
+        quoteService.getTwoHundredDaysIndicators("T", from, to);
     }
 
 }

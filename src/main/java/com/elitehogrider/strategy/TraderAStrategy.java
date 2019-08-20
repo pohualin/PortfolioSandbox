@@ -5,12 +5,14 @@ import com.elitehogrider.model.Signal;
 import com.elitehogrider.model.TradeType;
 import com.elitehogrider.model.TwoHundredDaysIndicators;
 import com.elitehogrider.service.QuoteService;
+import com.elitehogrider.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yahoofinance.histquotes.HistoricalQuote;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 @Service
@@ -21,6 +23,14 @@ public class TraderAStrategy extends AbstractStrategy implements Strategy {
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio) {
+        Calendar from = DateUtil.midnight();
+        from.add(Calendar.DATE, -1);
+        Calendar today = Calendar.getInstance();
+        return this.identifySignal(portfolio, from, today);
+    }
+
+    @Override
+    public List<Signal> identifySignal(Portfolio portfolio, Calendar from, Calendar to) {
         if (portfolio.getHoldings().isEmpty()) {
             throw new RuntimeException("Portfolio contains no stocks");
         }
@@ -28,7 +38,7 @@ public class TraderAStrategy extends AbstractStrategy implements Strategy {
         List<Signal> signals = new ArrayList<>();
 
         portfolio.getHoldings().keySet().forEach((ticker) -> {
-            List<TwoHundredDaysIndicators> indicatorsList = quoteService.getTwoHundredDaysIndicators(ticker.name());
+            List<TwoHundredDaysIndicators> indicatorsList = quoteService.getTwoHundredDaysIndicators(ticker.name(), from, to);
 
             indicatorsList.forEach((indicators -> {
                 BigDecimal close = indicators.getHistoricalQuote().getClose();

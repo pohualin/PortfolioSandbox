@@ -57,7 +57,10 @@ public class QuoteController {
 
     @RequestMapping("getTwoHundredDaysIndicators/{ticker}")
     public List<TwoHundredDaysIndicators> getTwoHundredDaysIndicators(@PathVariable String ticker) {
-        return quoteService.getTwoHundredDaysIndicators(ticker);
+        Calendar today = Calendar.getInstance();
+        Calendar from = (Calendar) today.clone();
+        from.add(Calendar.MONTH, 1);
+        return quoteService.getTwoHundredDaysIndicators(ticker, from, today);
     }
 
 }

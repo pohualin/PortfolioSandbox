@@ -1,8 +1,5 @@
 package com.elitehogrider.model;
 
-import yahoofinance.histquotes.HistoricalQuote;
-
-import java.math.BigDecimal;
 import java.util.Calendar;
 
 public class Signal {

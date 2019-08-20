@@ -3,7 +3,7 @@ package com.elitehogrider.strategy;
 import com.elitehogrider.model.Order;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
-import com.elitehogrider.model.TradeResult;
+import com.elitehogrider.model.SimulateResult;
 import com.elitehogrider.model.Trader;
 import com.elitehogrider.service.PortfolioService;
 import com.elitehogrider.service.TradeService;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,6 +39,11 @@ public class AbstractStrategy implements Strategy {
     }
 
     @Override
+    public List<Signal> identifySignal(Portfolio portfolio, Calendar from, Calendar to) {
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
     public Order processSignal(Portfolio portfolio, Signal signal) {
         Order order = new Order(signal.getDate(), signal.getTicker(), signal.getType(),
                 signal.getIndicators().getHistoricalQuote().getClose(),
@@ -50,14 +56,14 @@ public class AbstractStrategy implements Strategy {
     }
 
     @Override
-    public List<Signal> execute(Long traderId) {
+    public SimulateResult simulate(Long traderId, Calendar from, Calendar to) {
         Trader trader = traderService.getTrader(traderId);
         if (trader == null) {
             throw new RuntimeException("Not an existing trader. Please create a trader.");
         }
         Portfolio portfolio = trader.getPortfolio();
 
-        List<Signal> signals = identifySignal(portfolio);
+        List<Signal> signals = identifySignal(portfolio, from, to);
         List<Order> orders = new ArrayList<>();
         int[] counts = {0, 0, 0};
         signals.stream().forEach((signal) -> {
@@ -82,6 +88,11 @@ public class AbstractStrategy implements Strategy {
 
         log.debug("Identified {} trading signal", signals.size());
         log.debug("{} bought {} sold and {} discarded", counts[0], counts[1], counts[2]);
-        return signals;
+
+        SimulateResult result = new SimulateResult();
+        result.setSignals(signals);
+
+        return result;
     }
+
 }
