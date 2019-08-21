@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface QuoteService {
     List<TwoHundredDaysIndicators> getTwoHundredDaysIndicators(String ticker, Calendar from, Calendar to);
+
+    void getFriday();
 }

@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
 import java.util.Calendar;
 
 @RunWith(SpringRunner.class)
@@ -23,7 +22,7 @@ public class QuoteServiceTest {
     QuoteService quoteService;
 
     @Test
-    public void twoHundredDaysIndicators() throws IOException {
+    public void twoHundredDaysIndicators() {
         Calendar today = Calendar.getInstance();
         Calendar from = (Calendar) today.clone();
         from.add(Calendar.YEAR, -1);
@@ -33,13 +32,18 @@ public class QuoteServiceTest {
     }
 
     @Test
-    public void twoHundredDaysIndicatorsBadDates() throws IOException {
+    public void twoHundredDaysIndicatorsBadDates() {
         Calendar today = Calendar.getInstance();
         Calendar from = (Calendar) today.clone();
         from.add(Calendar.YEAR, -1);
         Calendar to = (Calendar) today.clone();
         to.add(Calendar.YEAR, -2);
         quoteService.getTwoHundredDaysIndicators("T", from, to);
+    }
+
+    @Test
+    public void getFriday() {
+        quoteService.getFriday();
     }
 
 }

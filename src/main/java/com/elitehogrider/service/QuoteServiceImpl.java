@@ -90,5 +90,16 @@ public class QuoteServiceImpl implements QuoteService {
         return items;
     }
 
+    @Override
+    public void getFriday() {
+        try {
+            Stock stock = YahooFinance.get("VTI", Interval.WEEKLY);
+            log.debug("Stock weekly {}", stock);
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
+
+
 }
 
