@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 public interface TraderService {
 
-    Trader newTrader(String name, BigDecimal amounts);
+    Trader newTrader(String name);
 
     Trader getTrader(Long id);
 

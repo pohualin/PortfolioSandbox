@@ -1,9 +1,6 @@
 package com.elitehogrider.service;
 
 import com.elitehogrider.model.Order;
-import com.elitehogrider.model.Portfolio;
-
-import java.util.Calendar;
 
 public interface TradeService {
 

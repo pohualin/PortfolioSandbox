@@ -25,14 +25,13 @@ public class TraderServiceTest {
 
     @Test
     public void newTrader() {
-        Trader trader = traderService.newTrader("George", new BigDecimal(10000));
+        Trader trader = traderService.newTrader("George");
         Assert.assertTrue(trader.getId() != null);
-        Assert.assertTrue(trader.getPortfolio() != null && trader.getPortfolio().getValue().equals(new BigDecimal(10000)));
     }
 
     @Test
     public void getTrader() {
-        Trader trader = traderService.newTrader("George", new BigDecimal(10000));
+        Trader trader = traderService.newTrader("George");
         Assert.assertTrue(trader.getId() != null);
 
         Trader created = traderService.getTrader(trader.getId());

@@ -1,5 +1,6 @@
 package com.elitehogrider.service;
 
+import com.elitehogrider.model.Account;
 import com.elitehogrider.model.Order;
 import com.elitehogrider.model.Ticker;
 import com.elitehogrider.model.TradeType;
@@ -38,21 +39,28 @@ public class TradeServiceTest {
 
     @Test
     public void buy() {
-        Trader george = traderService.newTrader("George", new BigDecimal(10000));
+        Trader george = traderService.newTrader("George");
+        Account account = new Account(new BigDecimal(10000), null);
+        george.setAccount(account);
+
         Order buy = new Order(Calendar.getInstance(), Ticker.T, TradeType.BUY, new BigDecimal(30), new BigDecimal(100));
         tradeService.buy(george.getId(), buy);
 
         george = traderService.getTrader(george.getId());
 
-        Assert.assertTrue(george.getPortfolio().getCash().equals(new BigDecimal(7000).setScale(5)));
-        Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getPrice().equals(new BigDecimal(30)));
-        Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getShares().equals(new BigDecimal(100)));
-        Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getTicker().equals(Ticker.T));
+        Assert.assertTrue(george.getAccount().getCash().equals(new BigDecimal(7000).setScale(5)));
+        Assert.assertTrue(george.getAccount().getHoldingByTicker(Ticker.T).get(0).getPrice().equals(new BigDecimal(30)));
+        Assert.assertTrue(george.getAccount().getHoldingByTicker(Ticker.T).get(0).getShares().equals(new BigDecimal(100)));
+        Assert.assertTrue(george.getAccount().getHoldingByTicker(Ticker.T).get(0).getTicker().equals(Ticker.T));
     }
 
     @Test
     public void buyWithoutMoney() throws Exception {
-        Trader george = traderService.newTrader("George", new BigDecimal(1000));
+        Trader george = traderService.newTrader("George");
+        Account account = new Account(new BigDecimal(0), null);
+        george.setAccount(account);
+
+
         Order buy = new Order(Calendar.getInstance(), Ticker.T, TradeType.BUY, new BigDecimal(30), new BigDecimal(100));
 
         expectedEx.expect(RuntimeException.class);
@@ -63,7 +71,10 @@ public class TradeServiceTest {
 
     @Test
     public void sell() {
-        Trader george = traderService.newTrader("George", new BigDecimal(10000));
+        Trader george = traderService.newTrader("George");
+        Account account = new Account(new BigDecimal(10000), null);
+        george.setAccount(account);
+
         Order buy = new Order(Calendar.getInstance(), Ticker.T, TradeType.BUY, new BigDecimal(30), new BigDecimal(100));
         tradeService.buy(george.getId(), buy);
 
@@ -72,14 +83,17 @@ public class TradeServiceTest {
 
         george = traderService.getTrader(george.getId());
 
-        Assert.assertTrue(george.getPortfolio().getCash().equals(new BigDecimal(8500).setScale(5)));
-        Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getShares().equals(new BigDecimal(50)));
-        Assert.assertTrue(george.getPortfolio().getHoldings().get(Ticker.T).get(0).getTicker().equals(Ticker.T));
+        Assert.assertTrue(george.getAccount().getCash().equals(new BigDecimal(8500).setScale(5)));
+        Assert.assertTrue(george.getAccount().getHoldingByTicker(Ticker.T).get(0).getShares().equals(new BigDecimal(50)));
+        Assert.assertTrue(george.getAccount().getHoldingByTicker(Ticker.T).get(0).getTicker().equals(Ticker.T));
     }
 
     @Test
     public void sellWithoutShares() throws Exception {
-        Trader george = traderService.newTrader("George", new BigDecimal(10000));
+        Trader george = traderService.newTrader("George");
+        Account account = new Account(new BigDecimal(10000), null);
+        george.setAccount(account);
+
         Order buy = new Order(Calendar.getInstance(), Ticker.T, TradeType.BUY, new BigDecimal(30), new BigDecimal(100));
         tradeService.buy(george.getId(), buy);
 

@@ -7,10 +7,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class TraderCacheConfig {
+public class AllCache {
 
     @Bean
     public Cache<Long, Trader> traderCache() {
         return Caffeine.from("maximumSize=10,expireAfterWrite=5m").build();
     }
+
 }

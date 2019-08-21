@@ -1,11 +1,12 @@
 package com.elitehogrider.strategy;
 
+import com.elitehogrider.model.Account;
 import com.elitehogrider.model.Order;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
 import com.elitehogrider.model.SimulateResult;
 import com.elitehogrider.model.Trader;
-import com.elitehogrider.service.PortfolioService;
+import com.elitehogrider.service.AccountService;
 import com.elitehogrider.service.TradeService;
 import com.elitehogrider.service.TraderService;
 import com.elitehogrider.util.Calculator;
@@ -31,7 +32,7 @@ public class AbstractStrategy implements Strategy {
     TraderService traderService;
 
     @Autowired
-    PortfolioService portfolioService;
+    AccountService accountService;
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio) {
@@ -44,11 +45,11 @@ public class AbstractStrategy implements Strategy {
     }
 
     @Override
-    public Order processSignal(Portfolio portfolio, Signal signal) {
+    public Order processSignal(Account account, Signal signal) {
         Order order = new Order(signal.getDate(), signal.getTicker(), signal.getType(),
                 signal.getIndicators().getHistoricalQuote().getClose(),
                 Calculator.getShares(new BigDecimal(500), signal.getIndicators().getHistoricalQuote().getClose()));
-        if (!OrderValidator.isValid(portfolio, order)) {
+        if (!OrderValidator.isValid(account, order)) {
             log.debug("Signal discarded: {}", signal);
             return null;
         }
@@ -61,13 +62,13 @@ public class AbstractStrategy implements Strategy {
         if (trader == null) {
             throw new RuntimeException("Not an existing trader. Please create a trader.");
         }
-        Portfolio portfolio = trader.getPortfolio();
+        Account account = trader.getAccount();
 
-        List<Signal> signals = identifySignal(portfolio, from, to);
+        List<Signal> signals = identifySignal(account.getPortfolio(), from, to);
         List<Order> orders = new ArrayList<>();
         int[] counts = {0, 0, 0};
         signals.stream().forEach((signal) -> {
-            Order orderToProcess = processSignal(portfolio, signal);
+            Order orderToProcess = processSignal(account, signal);
             if (orderToProcess != null) {
                 switch (orderToProcess.getType()) {
                     case BUY:
@@ -80,7 +81,7 @@ public class AbstractStrategy implements Strategy {
                         break;
                 }
             } else {
-                portfolioService.updateValue(portfolio, signal.getDate());
+                accountService.updateValue(account, signal.getDate());
                 counts[2]++;
             }
             orders.add(orderToProcess);

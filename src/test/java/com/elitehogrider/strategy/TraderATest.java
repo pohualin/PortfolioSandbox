@@ -1,11 +1,12 @@
 package com.elitehogrider.strategy;
 
+import com.elitehogrider.model.Account;
+import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Ticker;
 import com.elitehogrider.model.Trader;
-import com.elitehogrider.service.PortfolioService;
+import com.elitehogrider.service.AccountService;
 import com.elitehogrider.service.TraderService;
 import com.elitehogrider.util.DateUtil;
-import net.bytebuddy.asm.Advice;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +18,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Calendar;
 
 @RunWith(SpringRunner.class)
@@ -36,18 +36,21 @@ public class TraderATest {
     TraderAStrategy traderAStrategy;
 
     @Autowired
-    PortfolioService portfolioService;
+    AccountService accountService;
 
     @Before
     public void init() {
-        traderA = traderService.newTrader("George", new BigDecimal(10000));
-        portfolioService.addStocks(traderA.getPortfolio(), Arrays.asList(Ticker.T));
+        traderA = traderService.newTrader("George");
+        Portfolio portfolio = new Portfolio();
+        portfolio.getAllocation().putIfAbsent(Ticker.T, new BigDecimal(100));
+        Account account = new Account(new BigDecimal(10000), portfolio);
+        traderA.setAccount(account);
     }
 
     @Test
     public void identifySignal() {
         log.debug("Midnight {}", DateUtil.midnight());
-        traderAStrategy.identifySignal(traderA.getPortfolio());
+        traderAStrategy.identifySignal(traderA.getAccount().getPortfolio());
         log.debug("Midnight {}", DateUtil.midnight());
     }
 

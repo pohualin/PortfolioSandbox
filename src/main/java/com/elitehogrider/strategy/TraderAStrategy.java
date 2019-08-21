@@ -1,5 +1,6 @@
 package com.elitehogrider.strategy;
 
+import com.elitehogrider.model.Account;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
 import com.elitehogrider.model.SignalStatus;
@@ -32,13 +33,13 @@ public class TraderAStrategy extends AbstractStrategy implements Strategy {
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio, Calendar from, Calendar to) {
-        if (portfolio.getHoldings().isEmpty()) {
-            throw new RuntimeException("Portfolio contains no stocks");
+        if (portfolio.getAllocation().isEmpty()) {
+            throw new RuntimeException("Account contains no stocks");
         }
 
         List<Signal> signals = new ArrayList<>();
 
-        portfolio.getHoldings().keySet().forEach((ticker) -> {
+        portfolio.getAllocation().forEach((ticker, percentage) -> {
             List<TwoHundredDaysIndicators> indicatorsList = quoteService.getTwoHundredDaysIndicators(ticker.name(), from, to);
 
             indicatorsList.forEach((indicators -> {
