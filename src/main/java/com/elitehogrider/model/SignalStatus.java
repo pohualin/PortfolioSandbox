@@ -1,8 +1,10 @@
 package com.elitehogrider.model;
 
 public enum SignalStatus {
-    IDENTIFIED,
+    IDENTIFY_BUY,
+    IDENTIFY_SELL,
     BOUGHT,
     SOLD,
-    DISCARDED;
+    DISCARD_BUY,
+    DISCARD_SELL;
 }

@@ -37,8 +37,10 @@ public class AccountServiceImpl implements AccountService {
                 Calendar midnight = DateUtil.midnight();
 
                 if (updatedOn.before(midnight)) {
-                    List<HistoricalQuote> quotes = stock.getHistory(updatedOn, updatedOn, Interval.DAILY);
-                    reference.set(reference.get().add(quotes.get(0).getClose().multiply(shares)));
+                    Calendar buffer = (Calendar) updatedOn.clone();
+                    buffer.add(Calendar.DATE, -5);
+                    List<HistoricalQuote> quotes = stock.getHistory(buffer, updatedOn, Interval.DAILY);
+                    reference.set(reference.get().add(quotes.get(quotes.size() - 1).getAdjClose().multiply(shares)));
                 } else {
                     reference.set(reference.get().add(stock.getQuote().getPrice().multiply(shares)));
                 }
@@ -52,7 +54,7 @@ public class AccountServiceImpl implements AccountService {
             log.debug("{} shares of {}", holding.getShares(), holding.getTicker().name());
         });
         account.setValue(reference.get().add(account.getCash()).setScale(5, BigDecimal.ROUND_HALF_UP));
-        log.debug("Updated account value: {}", account.getValue());
+        log.debug("Account value {} on {}", account.getValue(), updatedOn.getTime());
     }
 
 }

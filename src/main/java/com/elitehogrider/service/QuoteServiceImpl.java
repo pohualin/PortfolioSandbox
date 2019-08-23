@@ -1,5 +1,7 @@
 package com.elitehogrider.service;
 
+import com.elitehogrider.model.BollingerBandIndicators;
+import com.elitehogrider.model.Indicators;
 import com.elitehogrider.model.TwoHundredDaysIndicators;
 import com.elitehogrider.util.Calculator;
 import com.elitehogrider.util.DateUtil;
@@ -7,13 +9,16 @@ import com.elitehogrider.util.QuoteUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 import yahoofinance.histquotes.HistoricalQuote;
 import yahoofinance.histquotes.Interval;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -55,6 +60,7 @@ public class QuoteServiceImpl implements QuoteService {
                     HistoricalQuote present = new HistoricalQuote();
                     present.setDate(midnight);
                     present.setClose(stock.getQuote().getPrice());
+                    present.setAdjClose(stock.getQuote().getPrice());
                     stock.getHistory().add(present);
                 }
             }
@@ -74,15 +80,73 @@ public class QuoteServiceImpl implements QuoteService {
                                     .collect(Collectors.toList());
 
                     log.debug("Dates: {} ~ {}", dateFrom.getTime(), dateTo.getTime());
-                    log.debug("History: {}", QuoteUtil.getHistoryCloses(quotes));
+                    log.debug("History: {}", QuoteUtil.getHistoryAdjCloses(quotes));
 
                     if (quotes.size() > 1)
                         items.add(new TwoHundredDaysIndicators(historicalQuote,
-                                Calculator.average(QuoteUtil.getHistoryCloses(quotes)),
-                                Calculator.stdev(QuoteUtil.getHistoryCloses(quotes))));
+                                Calculator.average(QuoteUtil.getHistoryAdjCloses(quotes)),
+                                Calculator.stdev(QuoteUtil.getHistoryAdjCloses(quotes), Calculator.StdevType.SAMPLE)));
                 }
             }
             Collections.sort(items);
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+
+        return items;
+    }
+
+    @Override
+    public List<BollingerBandIndicators> getBollingerBand(String ticker, Calendar from, Calendar to, int days, BigDecimal multiplier) {
+        Assert.isTrue(days < 50, "Please supply less than 100 days");
+        Calendar fetchFrom = (Calendar) from.clone();
+        fetchFrom.add(Calendar.DATE, -days * 2);
+
+        Stock stock;
+        List<BollingerBandIndicators> items = new ArrayList<>();
+        try {
+            stock = YahooFinance.get(ticker, fetchFrom, to, Interval.DAILY);
+
+            log.debug("Size: {}", stock.getHistory().size());
+
+            if (!to.before(DateUtil.midnight())) {
+                // Adding today when there is no HistoricalQuote for today (at trading hours)
+                Calendar midnight = DateUtil.midnight();
+
+                List<HistoricalQuote> filtered = stock.getHistory().stream()
+                        .filter(historicalQuote -> historicalQuote.getDate().equals(midnight))
+                        .collect(Collectors.toList());
+
+                if (filtered.isEmpty()) {
+                    HistoricalQuote present = new HistoricalQuote();
+                    present.setDate(midnight);
+                    present.setClose(stock.getQuote().getPrice());
+                    present.setAdjClose(stock.getQuote().getPrice());
+                    stock.getHistory().add(present);
+                }
+            }
+
+            log.debug("Size: {}", stock.getHistory().size());
+
+            for (int i = 0; i < stock.getHistory().size(); i++) {
+                HistoricalQuote historicalQuote = stock.getHistory().get(i);
+                Calendar hqDate = historicalQuote.getDate();
+                Calendar dateTo = (Calendar) hqDate.clone();
+                dateTo.add(Calendar.DATE, -1);
+
+                if (!dateTo.before(from)) {
+                    List<HistoricalQuote> quotes =
+                            stock.getHistory().subList(i + 1 - days, i + 1);
+
+                    if (quotes.size() > 1) {
+                        items.add(new BollingerBandIndicators(historicalQuote,
+                                Calculator.average(QuoteUtil.getHistoryAdjCloses(quotes)),
+                                Calculator.stdev(QuoteUtil.getHistoryAdjCloses(quotes), Calculator.StdevType.POPULATION), multiplier));
+                    }
+                }
+            }
+            Collections.sort(items);
+            items.forEach(item -> log.debug(item.toString()));
         } catch (IOException e) {
             throw new RuntimeException();
         }

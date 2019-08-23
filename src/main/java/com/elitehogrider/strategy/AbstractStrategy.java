@@ -4,12 +4,14 @@ import com.elitehogrider.model.Account;
 import com.elitehogrider.model.Order;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
+import com.elitehogrider.model.SignalStatus;
 import com.elitehogrider.model.SimulateResult;
 import com.elitehogrider.model.Trader;
 import com.elitehogrider.service.AccountService;
 import com.elitehogrider.service.TradeService;
 import com.elitehogrider.service.TraderService;
 import com.elitehogrider.util.Calculator;
+import com.elitehogrider.util.DateUtil;
 import com.elitehogrider.validator.OrderValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +38,10 @@ public class AbstractStrategy implements Strategy {
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio) {
-        return Collections.EMPTY_LIST;
+        Calendar from = DateUtil.midnight();
+        from.add(Calendar.DATE, -1);
+        Calendar today = Calendar.getInstance();
+        return this.identifySignal(portfolio, from, today);
     }
 
     @Override
@@ -47,10 +52,19 @@ public class AbstractStrategy implements Strategy {
     @Override
     public Order processSignal(Account account, Signal signal) {
         Order order = new Order(signal.getDate(), signal.getTicker(), signal.getType(),
-                signal.getIndicators().getHistoricalQuote().getClose(),
-                Calculator.getShares(new BigDecimal(500), signal.getIndicators().getHistoricalQuote().getClose()));
+                signal.getIndicators().getHistoricalQuote().getAdjClose(),
+                Calculator.getShares(new BigDecimal(500), signal.getIndicators().getHistoricalQuote().getAdjClose()));
         if (!OrderValidator.isValid(account, order)) {
-            log.debug("Signal discarded: {}", signal);
+            switch (signal.getType()) {
+                case BUY:
+                    signal.setStatus(SignalStatus.DISCARD_BUY);
+                    log.debug("Buy Signal discarded: {}", signal);
+                    break;
+                case SELL:
+                    signal.setStatus(SignalStatus.DISCARD_SELL);
+                    log.debug("Sell Signal discarded: {}", signal);
+                    break;
+            }
             return null;
         }
         return order;
@@ -73,10 +87,12 @@ public class AbstractStrategy implements Strategy {
                 switch (orderToProcess.getType()) {
                     case BUY:
                         tradeService.buy(traderId, orderToProcess);
+                        signal.setStatus(SignalStatus.BOUGHT);
                         counts[0]++;
                         break;
                     case SELL:
                         tradeService.sell(traderId, orderToProcess);
+                        signal.setStatus(SignalStatus.SOLD);
                         counts[1]++;
                         break;
                 }
@@ -90,8 +106,14 @@ public class AbstractStrategy implements Strategy {
         log.debug("Identified {} trading signal", signals.size());
         log.debug("{} bought {} sold and {} discarded", counts[0], counts[1], counts[2]);
 
+        accountService.updateValue(account, to);
+
         SimulateResult result = new SimulateResult();
         result.setSignals(signals);
+        result.setSummary(
+                String.format("Identified %s trading signals. Bought %s, sold %s and discarded %s",
+                        signals.size(), counts[0], counts[1], counts[2]));
+        result.setAccount(account);
 
         return result;
     }

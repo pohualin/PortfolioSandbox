@@ -15,17 +15,17 @@ import java.util.Calendar;
 @RunWith(SpringRunner.class)
 @SpringBootTest()
 @AutoConfigureMockMvc
-public class TraderATest extends AbstractStrategyTest {
+public class BollingerBandTest extends AbstractStrategyTest {
 
-    private final Logger log = LoggerFactory.getLogger(TraderATest.class);
+    private final Logger log = LoggerFactory.getLogger(BollingerBandTest.class);
 
     @Autowired
-    TraderAStrategy traderAStrategy;
+    BollingerBandStrategy bollingerBandStrategy;
 
     @Test
     public void identifySignal() {
         log.debug("Midnight {}", DateUtil.midnight());
-        traderAStrategy.identifySignal(trader.getAccount().getPortfolio());
+        bollingerBandStrategy.identifySignal(trader.getAccount().getPortfolio());
         log.debug("Midnight {}", DateUtil.midnight());
     }
 
@@ -33,7 +33,7 @@ public class TraderATest extends AbstractStrategyTest {
     public void simulate() {
         Calendar from = DateUtil.parseDateString("2018-06-01");
         Calendar to = DateUtil.parseDateString("2019-06-01");
-        traderAStrategy.simulate(trader.getId(), from, to);
+        bollingerBandStrategy.simulate(trader.getId(), from, to);
     }
 
 }

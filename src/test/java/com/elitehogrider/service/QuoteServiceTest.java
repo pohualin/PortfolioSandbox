@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.util.Calendar;
 
 @RunWith(SpringRunner.class)
@@ -39,6 +40,15 @@ public class QuoteServiceTest {
         Calendar to = (Calendar) today.clone();
         to.add(Calendar.YEAR, -2);
         quoteService.getTwoHundredDaysIndicators("T", from, to);
+    }
+
+    @Test
+    public void getBollingerBand() {
+        Calendar today = Calendar.getInstance();
+        Calendar from = (Calendar) today.clone();
+        from.add(Calendar.YEAR, -1);
+        Calendar to = (Calendar) today.clone();
+        quoteService.getBollingerBand("T", from, to, 20, new BigDecimal(2));
     }
 
     @Test

@@ -22,4 +22,10 @@ public final class QuoteUtil {
                 .map(historicalQuote -> historicalQuote.getClose())
                 .collect(Collectors.toList());
     }
+
+    public static List<BigDecimal> getHistoryAdjCloses(List<HistoricalQuote> historicalQuotes) throws IOException {
+        return historicalQuotes.stream()
+                .map(historicalQuote -> historicalQuote.getAdjClose())
+                .collect(Collectors.toList());
+    }
 }

@@ -14,16 +14,30 @@ public final class Calculator {
         return BigDecimal.valueOf(avg).setScale(5, BigDecimal.ROUND_HALF_UP);
     }
 
-    public static BigDecimal stdev(List<BigDecimal> series) {
+    public static BigDecimal stdev(List<BigDecimal> series, StdevType type) {
         BigDecimal mean = average(series);
 
         Double sum = series.stream()
                 .mapToDouble(value -> Math.pow(Math.abs(value.doubleValue() - mean.doubleValue()), 2))
                 .sum();
 
-        BigDecimal stdev = BigDecimal.valueOf(
-                Math.sqrt(sum / (series.size() - 1))).setScale(5, BigDecimal.ROUND_HALF_UP);
+        BigDecimal stdev = new BigDecimal(0);
+        switch (type) {
+            case POPULATION:
+                stdev = BigDecimal.valueOf(
+                        Math.sqrt(sum / (series.size()))).setScale(5, BigDecimal.ROUND_HALF_UP);
+                break;
+            case SAMPLE:
+                stdev = BigDecimal.valueOf(
+                        Math.sqrt(sum / (series.size() - 1))).setScale(5, BigDecimal.ROUND_HALF_UP);
+                break;
+        }
         return stdev;
+    }
+
+    public enum StdevType {
+        POPULATION,
+        SAMPLE;
     }
 
     public static BigDecimal getShares(BigDecimal amount, BigDecimal price) {

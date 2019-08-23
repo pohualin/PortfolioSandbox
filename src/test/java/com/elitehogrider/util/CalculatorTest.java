@@ -53,7 +53,7 @@ public class CalculatorTest {
         }
 
         BigDecimal mean = Calculator.average(series);
-        BigDecimal stdev = Calculator.stdev(series);
+        BigDecimal stdev = Calculator.stdev(series, Calculator.StdevType.SAMPLE);
 
         BigDecimal[] values = new BigDecimal[5];
         values[0] = mean.subtract(stdev.multiply(new BigDecimal(2)));
@@ -80,7 +80,7 @@ public class CalculatorTest {
                         YahooFinance.get("T", from, to, Interval.DAILY).getHistory()));
         BigDecimal stdevT = Calculator.stdev(
                 QuoteUtil.getHistoryCloses(
-                        YahooFinance.get("T", from, to, Interval.DAILY).getHistory()));
+                        YahooFinance.get("T", from, to, Interval.DAILY).getHistory()), Calculator.StdevType.SAMPLE);
 
         BigDecimal[] valuesT = new BigDecimal[5];
         valuesT[0] = meanT.subtract(stdevT.multiply(new BigDecimal(2)));
