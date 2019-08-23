@@ -1,13 +1,12 @@
 package com.elitehogrider.strategy;
 
+import com.elitehogrider.config.Variables;
 import com.elitehogrider.model.BollingerBandIndicators;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
 import com.elitehogrider.model.SignalStatus;
 import com.elitehogrider.model.TradeType;
-import com.elitehogrider.model.TwoHundredDaysIndicators;
 import com.elitehogrider.service.QuoteService;
-import com.elitehogrider.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yahoofinance.histquotes.HistoricalQuote;
@@ -33,7 +32,7 @@ public class BollingerBandStrategy extends AbstractStrategy implements Strategy 
 
         portfolio.getAllocation().forEach((ticker, percentage) -> {
             List<BollingerBandIndicators> indicatorsList =
-                    quoteService.getBollingerBand(ticker.name(), from, to, 20, new BigDecimal(2.1));
+                    quoteService.getBollingerBand(ticker.name(), from, to, Variables.BB_DAYS, Variables.BB_MULTIPLIER);
 
             indicatorsList.forEach((indicators -> {
                 BigDecimal adjClose = indicators.getHistoricalQuote().getAdjClose();

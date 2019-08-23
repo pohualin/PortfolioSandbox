@@ -45,7 +45,7 @@ public class AccountServiceImpl implements AccountService {
                     reference.set(reference.get().add(stock.getQuote().getPrice().multiply(shares)));
                 }
             } catch (IOException e) {
-                throw new RuntimeException();
+                throw new RuntimeException(e);
             }
         });
 
