@@ -7,5 +7,4 @@ public class TradeHistory {
     List<Order> orders;
 
 
-
 }

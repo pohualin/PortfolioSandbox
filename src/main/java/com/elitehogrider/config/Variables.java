@@ -9,7 +9,7 @@ public class Variables {
     public static final int TWO_HUNDRED_DAYS = 200;
     public static final Calculator.StdevType TH_MA_STDEV_TYPE = Calculator.StdevType.SAMPLE;
 
-
+    // Bollinger Band Strategy
     public static final int BB_DAYS = 20;
     public static final BigDecimal BB_MULTIPLIER = new BigDecimal(2.1);
     public static final int BB_MAX_DAYS = 50;

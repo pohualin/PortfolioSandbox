@@ -1,5 +1,7 @@
 package com.elitehogrider.model;
 
+import com.elitehogrider.validator.AccountValidator;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +48,15 @@ public class Account {
         return portfolio;
     }
 
+    public void setPortfolio(Portfolio portfolio) {
+        AccountValidator.validate(this, portfolio);
+        this.portfolio = portfolio;
+    }
+
     public List<Holding> getHoldingByTicker(Ticker ticker) {
         return holdings.stream()
                 .filter(holding -> holding.getTicker().equals(ticker))
                 .collect(Collectors.toList());
     }
+
 }

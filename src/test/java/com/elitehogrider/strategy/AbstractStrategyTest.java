@@ -17,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest()
@@ -39,8 +41,9 @@ public class AbstractStrategyTest {
     @Before
     public void init() {
         trader = traderService.newTrader("George");
-        Portfolio portfolio = new Portfolio();
-        portfolio.getAllocation().putIfAbsent(Ticker.T, new BigDecimal(100));
+        Map<Ticker, BigDecimal> allocation = new HashMap<>();
+        allocation.putIfAbsent(Ticker.T, new BigDecimal(100.00));
+        Portfolio portfolio = new Portfolio(allocation);
         Account account = new Account(new BigDecimal(10000), portfolio);
         trader.setAccount(account);
     }
