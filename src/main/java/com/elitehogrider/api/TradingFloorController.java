@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("trading")
@@ -48,14 +49,8 @@ public class TradingFloorController {
 
     @RequestMapping("traderA/identifySignal")
     public List<Signal> identifyTraderASignal() {
-        Portfolio portfolio = new Portfolio(new HashMap<>());
-        portfolio.getAllocation().putIfAbsent(Ticker.T, new BigDecimal(100));
-        portfolio.getAllocation().putIfAbsent(Ticker.VZ, new BigDecimal(100));
-        portfolio.getAllocation().putIfAbsent(Ticker.VTI, new BigDecimal(100));
-        portfolio.getAllocation().putIfAbsent(Ticker.VNQ, new BigDecimal(100));
-        portfolio.getAllocation().putIfAbsent(Ticker.BND, new BigDecimal(100));
-        portfolio.getAllocation().putIfAbsent(Ticker.FLRN, new BigDecimal(100));
-        return traderAStrategy.identifySignal(portfolio);
+        Trader trader = initTrader();
+        return traderAStrategy.identifySignal(trader.getAccount().getPortfolio());
     }
 
     @RequestMapping("bollingerBand/simulate/{from}/{to}")
@@ -66,8 +61,9 @@ public class TradingFloorController {
 
     private Trader initTrader() {
         Trader trader = traderService.newTrader("George");
-        Portfolio portfolio = new Portfolio(new HashMap<>());
-        portfolio.getAllocation().putIfAbsent(Ticker.VTI, new BigDecimal(100));
+        Map allocation = new HashMap<>();
+        allocation.putIfAbsent(Ticker.VTI, new BigDecimal(100.00));
+        Portfolio portfolio = new Portfolio(allocation);
         Account account = new Account(new BigDecimal(10000), portfolio);
         trader.setAccount(account);
         return trader;
