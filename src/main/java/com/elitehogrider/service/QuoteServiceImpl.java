@@ -2,7 +2,6 @@ package com.elitehogrider.service;
 
 import com.elitehogrider.config.Variables;
 import com.elitehogrider.model.BollingerBandIndicators;
-import com.elitehogrider.model.Indicators;
 import com.elitehogrider.model.TwoHundredDaysIndicators;
 import com.elitehogrider.util.Calculator;
 import com.elitehogrider.util.DateUtil;
@@ -19,7 +18,6 @@ import yahoofinance.histquotes.Interval;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -29,14 +27,43 @@ import java.util.stream.Collectors;
 public class QuoteServiceImpl implements QuoteService {
     private final Logger log = LoggerFactory.getLogger(QuoteServiceImpl.class);
 
-    /**
-     * Two hundred days indicators are calculated from today -200 to today.
-     * With real time data, we only get today -200 to today -1
-     * With historical data, we should calculate from dateTo -200 to dateTo -1
-     *
-     * @param ticker
-     * @return
-     */
+    @Override
+    public List<TwoHundredDaysIndicators> getTwoHundred(String ticker, Calendar from, Calendar to) {
+        Calendar fetchFrom = (Calendar) from.clone();
+        fetchFrom.add(Calendar.DATE, -Variables.THREE_HUNDRED_TWENTY_DAYS);
+
+        Stock stock;
+        List<TwoHundredDaysIndicators> items = new ArrayList<>();
+        try {
+            stock = YahooFinance.get(ticker, fetchFrom, to, Interval.DAILY);
+
+            _addTodayHistoricalQuote(stock, to);
+            
+            for (int i = 0; i < stock.getHistory().size(); i++) {
+                HistoricalQuote historicalQuote = stock.getHistory().get(i);
+                Calendar hqDate = historicalQuote.getDate();
+                Calendar dateTo = (Calendar) hqDate.clone();
+                dateTo.add(Calendar.DATE, -1);
+
+                if (!dateTo.before(from)) {
+                    List<HistoricalQuote> quotes =
+                            stock.getHistory().subList(i - 200, i);
+
+                    if (quotes.size() > 1)
+                        items.add(new TwoHundredDaysIndicators(historicalQuote,
+                                Calculator.average(QuoteUtil.getHistoryAdjCloses(quotes)),
+                                Calculator.stdev(QuoteUtil.getHistoryAdjCloses(quotes), Variables.TH_MA_STDEV_TYPE)));
+                }
+            }
+            Collections.sort(items);
+            items.stream().forEach((indicator) -> log.debug("Indicator: {}", indicator));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return items;
+    }
+
     @Override
     public List<TwoHundredDaysIndicators> getTwoHundredDaysIndicators(String ticker, Calendar from, Calendar to) {
         Calendar fetchFrom = (Calendar) from.clone();

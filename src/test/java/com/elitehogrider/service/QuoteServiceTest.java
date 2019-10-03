@@ -23,6 +23,16 @@ public class QuoteServiceTest {
     QuoteService quoteService;
 
     @Test
+    public void twoHundred() {
+        Calendar today = Calendar.getInstance();
+        Calendar from = (Calendar) today.clone();
+        from.add(Calendar.YEAR, -1);
+        Calendar to = (Calendar) today.clone();
+        // to.add(Calendar.MONTH, -1);
+        quoteService.getTwoHundred("T", from, to);
+    }
+
+    @Test
     public void twoHundredDaysIndicators() {
         Calendar today = Calendar.getInstance();
         Calendar from = (Calendar) today.clone();

@@ -13,6 +13,7 @@ import com.elitehogrider.service.TraderService;
 import com.elitehogrider.util.Calculator;
 import com.elitehogrider.util.DateUtil;
 import com.elitehogrider.validator.OrderValidator;
+import com.elitehogrider.validator.PortfolioValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class AbstractStrategy implements Strategy {
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio) {
+        PortfolioValidator.validate(portfolio);
         Calendar from = DateUtil.midnight();
         from.add(Calendar.DATE, -1);
         Calendar today = Calendar.getInstance();
@@ -46,6 +48,7 @@ public class AbstractStrategy implements Strategy {
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio, Calendar from, Calendar to) {
+        PortfolioValidator.validate(portfolio);
         return Collections.EMPTY_LIST;
     }
 

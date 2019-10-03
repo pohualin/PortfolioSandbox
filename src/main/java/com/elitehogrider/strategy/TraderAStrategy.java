@@ -23,14 +23,12 @@ public class TraderAStrategy extends AbstractStrategy implements Strategy {
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio, Calendar from, Calendar to) {
-        if (portfolio.getAllocation().isEmpty()) {
-            throw new RuntimeException("Account contains no stocks");
-        }
+        super.identifySignal(portfolio, from, to);
 
         List<Signal> signals = new ArrayList<>();
 
         portfolio.getAllocation().forEach((ticker, percentage) -> {
-            List<TwoHundredDaysIndicators> indicatorsList = quoteService.getTwoHundredDaysIndicators(ticker.name(), from, to);
+            List<TwoHundredDaysIndicators> indicatorsList = quoteService.getTwoHundred(ticker.name(), from, to);
 
             indicatorsList.forEach((indicators -> {
                 BigDecimal adjClose = indicators.getHistoricalQuote().getAdjClose();

@@ -24,15 +24,13 @@ public class TraderATest extends AbstractStrategyTest {
 
     @Test
     public void identifySignal() {
-        log.debug("Midnight {}", DateUtil.midnight());
         traderAStrategy.identifySignal(trader.getAccount().getPortfolio());
-        log.debug("Midnight {}", DateUtil.midnight());
     }
 
     @Test
     public void simulate() {
-        Calendar from = DateUtil.parseDateString("2018-06-01");
-        Calendar to = DateUtil.parseDateString("2019-06-01");
+        Calendar from = DateUtil.parseDateString("2018-01-01");
+        Calendar to = DateUtil.parseDateString("2019-10-01");
         traderAStrategy.simulate(trader.getId(), from, to);
     }
 

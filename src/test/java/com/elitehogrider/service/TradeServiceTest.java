@@ -2,6 +2,7 @@ package com.elitehogrider.service;
 
 import com.elitehogrider.model.Account;
 import com.elitehogrider.model.Order;
+import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Ticker;
 import com.elitehogrider.model.TradeType;
 import com.elitehogrider.model.Trader;
@@ -20,6 +21,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest()
@@ -40,7 +43,10 @@ public class TradeServiceTest {
     @Test
     public void buy() {
         Trader george = traderService.newTrader("George");
-        Account account = new Account(new BigDecimal(10000), null);
+        Map<Ticker, BigDecimal> allocation = new HashMap<>();
+        allocation.putIfAbsent(Ticker.T, new BigDecimal(100));
+        Portfolio portfolio = new Portfolio(allocation);
+        Account account = new Account(new BigDecimal(10000), portfolio);
         george.setAccount(account);
 
         Order buy = new Order(Calendar.getInstance(), Ticker.T, TradeType.BUY, new BigDecimal(30), new BigDecimal(100));
@@ -57,7 +63,10 @@ public class TradeServiceTest {
     @Test
     public void buyWithoutMoney() throws Exception {
         Trader george = traderService.newTrader("George");
-        Account account = new Account(new BigDecimal(0), null);
+        Map<Ticker, BigDecimal> allocation = new HashMap<>();
+        allocation.putIfAbsent(Ticker.T, new BigDecimal(100));
+        Portfolio portfolio = new Portfolio(allocation);
+        Account account = new Account(BigDecimal.ZERO, portfolio);
         george.setAccount(account);
 
 
@@ -72,7 +81,10 @@ public class TradeServiceTest {
     @Test
     public void sell() {
         Trader george = traderService.newTrader("George");
-        Account account = new Account(new BigDecimal(10000), null);
+        Map<Ticker, BigDecimal> allocation = new HashMap<>();
+        allocation.putIfAbsent(Ticker.T, new BigDecimal(100));
+        Portfolio portfolio = new Portfolio(allocation);
+        Account account = new Account(new BigDecimal(10000), portfolio);
         george.setAccount(account);
 
         Order buy = new Order(Calendar.getInstance(), Ticker.T, TradeType.BUY, new BigDecimal(30), new BigDecimal(100));
@@ -91,7 +103,10 @@ public class TradeServiceTest {
     @Test
     public void sellWithoutShares() throws Exception {
         Trader george = traderService.newTrader("George");
-        Account account = new Account(new BigDecimal(10000), null);
+        Map<Ticker, BigDecimal> allocation = new HashMap<>();
+        allocation.putIfAbsent(Ticker.T, new BigDecimal(100));
+        Portfolio portfolio = new Portfolio(allocation);
+        Account account = new Account(new BigDecimal(10000), portfolio);
         george.setAccount(account);
 
         Order buy = new Order(Calendar.getInstance(), Ticker.T, TradeType.BUY, new BigDecimal(30), new BigDecimal(100));

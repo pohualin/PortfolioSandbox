@@ -5,6 +5,7 @@ import com.elitehogrider.validator.AccountValidator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,7 @@ public class Account {
 
     public Account(BigDecimal amount, Portfolio portfolio) {
         this.id = UUID.randomUUID().getMostSignificantBits();
-        this.portfolio = portfolio;
+        this.portfolio = Objects.requireNonNull(portfolio);
         this.value = amount;
         this.cash = amount;
         this.holdings = new ArrayList<>();

@@ -38,9 +38,7 @@ public class RothIRAStratagy extends AbstractStrategy implements Strategy {
 
     @Override
     public List<Signal> identifySignal(Portfolio portfolio, Calendar from, Calendar to) {
-        if (portfolio.getAllocation().isEmpty()) {
-            throw new RuntimeException("Account contains no stocks");
-        }
+        super.identifySignal(portfolio, from, to);
         List<Signal> signals = new ArrayList<>();
         return signals;
     }

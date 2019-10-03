@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 public class Variables {
 
     public static final int TWO_HUNDRED_DAYS = 200;
+    public static final int THREE_HUNDRED_TWENTY_DAYS = 320;
     public static final Calculator.StdevType TH_MA_STDEV_TYPE = Calculator.StdevType.SAMPLE;
 
     // Bollinger Band Strategy

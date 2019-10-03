@@ -1,6 +1,6 @@
 package com.elitehogrider.model;
 
-import com.elitehogrider.validator.PortfolioAllocateValidator;
+import com.elitehogrider.validator.PortfolioValidator;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -11,12 +11,11 @@ public class Portfolio {
     Map<Ticker, BigDecimal> allocation;
 
     public Portfolio(Map<Ticker, BigDecimal> allocation) {
-        PortfolioAllocateValidator.validate(allocation);
         this.allocation = Collections.unmodifiableMap(allocation);
+        PortfolioValidator.validate(this);
     }
 
     public Map<Ticker, BigDecimal> getAllocation() {
         return allocation;
     }
-
 }
