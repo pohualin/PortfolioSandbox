@@ -1,4 +1,4 @@
-package com.elitehogrider.model;
+package com.elitehogrider.model.indicator;
 
 import yahoofinance.histquotes.HistoricalQuote;
 

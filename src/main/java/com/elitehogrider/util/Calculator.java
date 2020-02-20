@@ -11,7 +11,7 @@ public final class Calculator {
     public static BigDecimal average(List<BigDecimal> series) {
         double avg = series.stream()
                 .mapToDouble(BigDecimal::doubleValue).average().orElse(Double.NaN);
-        return BigDecimal.valueOf(avg).setScale(5, BigDecimal.ROUND_HALF_UP);
+        return BigDecimal.valueOf(avg).setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
     public static BigDecimal stdev(List<BigDecimal> series, StdevType type) {
@@ -25,11 +25,11 @@ public final class Calculator {
         switch (type) {
             case POPULATION:
                 stdev = BigDecimal.valueOf(
-                        Math.sqrt(sum / (series.size()))).setScale(5, BigDecimal.ROUND_HALF_UP);
+                        Math.sqrt(sum / (series.size()))).setScale(2, BigDecimal.ROUND_HALF_UP);
                 break;
             case SAMPLE:
                 stdev = BigDecimal.valueOf(
-                        Math.sqrt(sum / (series.size() - 1))).setScale(5, BigDecimal.ROUND_HALF_UP);
+                        Math.sqrt(sum / (series.size() - 1))).setScale(2, BigDecimal.ROUND_HALF_UP);
                 break;
         }
         return stdev;

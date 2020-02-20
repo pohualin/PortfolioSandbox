@@ -4,7 +4,7 @@ import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
 import com.elitehogrider.model.SignalStatus;
 import com.elitehogrider.model.TradeType;
-import com.elitehogrider.model.TwoHundredDaysIndicators;
+import com.elitehogrider.model.indicator.TwoHundredDaysIndicators;
 import com.elitehogrider.service.QuoteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

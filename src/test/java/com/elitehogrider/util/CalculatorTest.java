@@ -41,8 +41,8 @@ public class CalculatorTest {
                 Calculator.average(
                         QuoteUtil.getHistoryCloses(stock.getHistory()));
         log.debug("Calculated 200 MA {}, Fetched 200 MA {}",
-                twoHundredMA, stock.getQuote().getPriceAvg200().setScale(5, BigDecimal.ROUND_HALF_UP));
-        // Assert.assertTrue(twoHundredMA.equals(stock.getQuote().getPriceAvg200().setScale(5, BigDecimal.ROUND_HALF_UP)));
+                twoHundredMA, stock.getQuote().getPriceAvg200().setScale(2, BigDecimal.ROUND_HALF_UP));
+        // Assert.assertTrue(twoHundredMA.equals(stock.getQuote().getPriceAvg200().setScale(2, BigDecimal.ROUND_HALF_UP)));
     }
 
     @Test
@@ -65,8 +65,8 @@ public class CalculatorTest {
         log.debug("STDEV: {}", stdev);
         log.debug("Values: {}", Arrays.toString(values));
 
-        Assert.assertTrue(mean.equals(BigDecimal.valueOf(5.5).setScale(5)));
-        Assert.assertTrue(stdev.equals(BigDecimal.valueOf(3.02765)));
+        Assert.assertTrue(mean.equals(BigDecimal.valueOf(5.5).setScale(2)));
+        Assert.assertTrue(stdev.equals(BigDecimal.valueOf(3.03)));
 
         Calendar today = Calendar.getInstance();
 
@@ -75,6 +75,7 @@ public class CalculatorTest {
         from.add(Calendar.DATE, -201);
         to.add(Calendar.DATE, -1);
 
+        Stock T = YahooFinance.get("T", from, to, Interval.DAILY);
         BigDecimal meanT = Calculator.average(
                 QuoteUtil.getHistoryCloses(
                         YahooFinance.get("T", from, to, Interval.DAILY).getHistory()));
@@ -89,6 +90,7 @@ public class CalculatorTest {
         valuesT[3] = meanT.add(stdevT);
         valuesT[4] = meanT.add(stdevT.multiply(new BigDecimal(2)));
 
+        log.debug("T 200 MA: {}", T.getQuote().getPriceAvg200());
         log.debug("Mean T: {}", meanT);
         log.debug("STDEV T: {}", stdevT);
         log.debug("Values T: {}", Arrays.toString(valuesT));

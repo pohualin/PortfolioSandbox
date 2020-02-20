@@ -1,4 +1,4 @@
-package com.elitehogrider.model;
+package com.elitehogrider.model.indicator;
 
 import org.springframework.core.style.ToStringCreator;
 import yahoofinance.histquotes.HistoricalQuote;

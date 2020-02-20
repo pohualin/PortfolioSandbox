@@ -1,11 +1,15 @@
 package com.elitehogrider.service;
 
-import com.elitehogrider.model.BollingerBandIndicators;
-import com.elitehogrider.model.TwoHundredDaysIndicators;
+import com.elitehogrider.model.indicator.BollingerBandIndicators;
+import com.elitehogrider.model.indicator.TwoHundredDaysIndicators;
+import com.elitehogrider.model.param.DayOfWeekParam;
+import com.elitehogrider.model.param.MovingAverageParam;
+import yahoofinance.histquotes.HistoricalQuote;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 public interface QuoteService {
 
@@ -23,5 +27,13 @@ public interface QuoteService {
 
     List<BollingerBandIndicators> getBollingerBand(String ticker, Calendar from, Calendar to, int days, BigDecimal multiplier);
 
-    void getFriday();
+    List<HistoricalQuote> getDayOfWeek(DayOfWeekParam params);
+
+    /**
+     * Moving average with given paramters
+     *
+     * @param params to be used
+     * @return
+     */
+    Map<Calendar, BigDecimal> getMovingAverage(MovingAverageParam params);
 }

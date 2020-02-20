@@ -1,5 +1,6 @@
 package com.elitehogrider.model;
 
+import com.elitehogrider.model.indicator.Indicators;
 import org.springframework.core.style.ToStringCreator;
 
 import java.util.Calendar;

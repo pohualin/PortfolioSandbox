@@ -42,7 +42,7 @@ public class TradeServiceImpl implements TradeService {
 
         BigDecimal cash = trader.getAccount().getCash();
         BigDecimal amount = order.getPrice().multiply(order.getShares());
-        account.setCash(cash.subtract(amount).setScale(5, BigDecimal.ROUND_HALF_UP));
+        account.setCash(cash.subtract(amount).setScale(2, BigDecimal.ROUND_HALF_UP));
 
         Holding inbound = new Holding(order.getTicker(), order.getPrice(), order.getShares());
 
@@ -74,7 +74,7 @@ public class TradeServiceImpl implements TradeService {
         BigDecimal cash = trader.getAccount().getCash();
         BigDecimal amount = order.getPrice().multiply(order.getShares());
 
-        account.setCash(cash.add(amount).setScale(5, BigDecimal.ROUND_HALF_UP));
+        account.setCash(cash.add(amount).setScale(2, BigDecimal.ROUND_HALF_UP));
         List<Holding> holdings = trader.getAccount().getHoldingByTicker(order.getTicker());
         holdings.get(0).setShares(holdings.get(0).getShares().subtract(order.getShares()));
 

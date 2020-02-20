@@ -49,7 +49,7 @@ public class AccountServiceImpl implements AccountService {
         account.getHoldings().forEach((holding) -> {
             log.debug("{} shares of {}", holding.getShares(), holding.getTicker().name());
         });
-        account.setValue(reference.get().add(account.getCash()).setScale(5, BigDecimal.ROUND_HALF_UP));
+        account.setValue(reference.get().add(account.getCash()).setScale(2, BigDecimal.ROUND_HALF_UP));
         log.debug("Account value {} on {}", account.getValue(), updatedOn.getTime());
     }
 

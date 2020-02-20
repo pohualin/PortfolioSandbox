@@ -1,7 +1,7 @@
 package com.elitehogrider.api;
 
 import com.elitehogrider.model.Ticker;
-import com.elitehogrider.model.TwoHundredDaysIndicators;
+import com.elitehogrider.model.indicator.TwoHundredDaysIndicators;
 import com.elitehogrider.service.QuoteService;
 import com.elitehogrider.util.QuoteUtil;
 import org.slf4j.Logger;

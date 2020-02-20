@@ -1,4 +1,4 @@
-package com.elitehogrider.model;
+package com.elitehogrider.model.indicator;
 
 import org.springframework.core.style.ToStringCreator;
 import yahoofinance.histquotes.HistoricalQuote;
@@ -14,8 +14,8 @@ public class BollingerBandIndicators extends Indicators {
     public BollingerBandIndicators(HistoricalQuote historicalQuote, BigDecimal average, BigDecimal stdev, BigDecimal multiplier) {
         super(historicalQuote);
         this.average = average;
-        this.lowerBand = average.subtract(stdev.multiply(multiplier)).setScale(5, BigDecimal.ROUND_HALF_UP);
-        this.upperBand = average.add(stdev.multiply(multiplier)).setScale(5, BigDecimal.ROUND_HALF_UP);
+        this.lowerBand = average.subtract(stdev.multiply(multiplier)).setScale(2, BigDecimal.ROUND_HALF_UP);
+        this.upperBand = average.add(stdev.multiply(multiplier)).setScale(2, BigDecimal.ROUND_HALF_UP);
     }
 
     public BigDecimal getAverage() {

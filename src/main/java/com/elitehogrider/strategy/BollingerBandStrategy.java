@@ -1,7 +1,7 @@
 package com.elitehogrider.strategy;
 
 import com.elitehogrider.config.Variables;
-import com.elitehogrider.model.BollingerBandIndicators;
+import com.elitehogrider.model.indicator.BollingerBandIndicators;
 import com.elitehogrider.model.Portfolio;
 import com.elitehogrider.model.Signal;
 import com.elitehogrider.model.SignalStatus;

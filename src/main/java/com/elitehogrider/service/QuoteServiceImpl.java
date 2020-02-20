@@ -1,8 +1,10 @@
 package com.elitehogrider.service;
 
 import com.elitehogrider.config.Variables;
-import com.elitehogrider.model.BollingerBandIndicators;
-import com.elitehogrider.model.TwoHundredDaysIndicators;
+import com.elitehogrider.model.indicator.BollingerBandIndicators;
+import com.elitehogrider.model.indicator.TwoHundredDaysIndicators;
+import com.elitehogrider.model.param.DayOfWeekParam;
+import com.elitehogrider.model.param.MovingAverageParam;
 import com.elitehogrider.util.Calculator;
 import com.elitehogrider.util.DateUtil;
 import com.elitehogrider.util.QuoteUtil;
@@ -21,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +42,7 @@ public class QuoteServiceImpl implements QuoteService {
             stock = YahooFinance.get(ticker, fetchFrom, to, Interval.DAILY);
 
             _addTodayHistoricalQuote(stock, to);
-            
+
             for (int i = 0; i < stock.getHistory().size(); i++) {
                 HistoricalQuote historicalQuote = stock.getHistory().get(i);
                 Calendar hqDate = historicalQuote.getDate();
@@ -148,18 +152,57 @@ public class QuoteServiceImpl implements QuoteService {
     }
 
     @Override
-    public void getFriday() {
+    public List<HistoricalQuote> getDayOfWeek(DayOfWeekParam params) {
+        Stock stock;
+        List<HistoricalQuote> quotes;
         try {
-            Stock stock = YahooFinance.get("VTI", Interval.WEEKLY);
-            log.debug("Stock weekly {}", stock);
+            stock = YahooFinance.get(params.getTicker(), params.getFrom(), params.getTo(), params.getInterval());
+            quotes = stock.getHistory().stream()
+                    .filter((hq -> hq.getDate().get(Calendar.DAY_OF_WEEK) == params.getDayOfWeek()))
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        return quotes;
+    }
+
+    @Override
+    public Map<Calendar, BigDecimal> getMovingAverage(MovingAverageParam params) {
+        Calendar fetchFrom = (Calendar) params.getFrom().clone();
+        fetchFrom.add(Calendar.DATE, -params.getPeriod() * 2);
+
+        Stock stock;
+        Map<Calendar, BigDecimal> items = new TreeMap<>();
+        try {
+            stock = YahooFinance.get(params.getTicker(), fetchFrom, params.getTo(), params.getInterval());
+
+            _addTodayHistoricalQuote(stock, params.getTo());
+
+            for (int i = 0; i < stock.getHistory().size(); i++) {
+                HistoricalQuote historicalQuote = stock.getHistory().get(i);
+                Calendar hqDate = historicalQuote.getDate();
+                Calendar dateTo = (Calendar) hqDate.clone();
+                // dateTo.add(Calendar.DATE, -1);
+
+                if (!dateTo.before(params.getFrom())) {
+                    List<HistoricalQuote> quotes =
+                            stock.getHistory().subList(i - params.getPeriod() + 1, i + 1);
+                    if (quotes.size() > 1) {
+                        items.putIfAbsent(historicalQuote.getDate(),
+                                Calculator.average(QuoteUtil.getHistoryCloses(quotes)));
+                    }
+                }
+            }
+            items.entrySet().forEach((entry) -> log.info("Date: {}, {} SMA: {}", entry.getKey().getTime(), params.getPeriod(), entry.getValue()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return items;
     }
 
     private void _addTodayHistoricalQuote(Stock stock, Calendar to) throws IOException {
         if (!to.before(DateUtil.midnight())) {
-            // Adding today when there is no HistoricalQuote for today (at trading hours)
+            // Adding today when there is no HistoricalQuote for today (during trading hours)
             Calendar midnight = DateUtil.midnight();
 
             List<HistoricalQuote> filtered = stock.getHistory().stream()
